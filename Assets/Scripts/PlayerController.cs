@@ -17,6 +17,9 @@ public class PlayerController : MonoBehaviour {
 
     public float velocityClamp = 30;
 
+    public float maxSpeed = 15;
+    public float speed = 20;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -27,19 +30,23 @@ public class PlayerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        if (charge == 0)
-        {
-            DoMovement();
-        }
         GetJumpCharge();
 	}
 
+    private void FixedUpdate()
+    {
+        DoMovement();
+    }
+
     private void DoMovement()
     {
-        float x = Input.GetAxis("Horizontal") * 30;
-        float z = Input.GetAxis("Vertical") * 30;
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
 
-        body.AddForce(new Vector3(x, 0, z));
+        if (body.velocity.magnitude <= maxSpeed)
+        {
+            body.AddRelativeForce(new Vector3(x * speed, 0, z *speed));
+        }
     }
 
     private void GetJumpCharge()
@@ -69,9 +76,6 @@ public class PlayerController : MonoBehaviour {
         }
         if (Input.GetButtonUp("Jump"))
         {
-            float x = Input.GetAxis("Horizontal");
-            float z = Input.GetAxis("Vertical");
-
             body.AddForce(new Vector3(0, 500 + charge, 0));
             charge = 0;
         }

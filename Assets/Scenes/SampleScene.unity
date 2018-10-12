@@ -147,6 +147,8 @@ MonoBehaviour:
   chargeMax: 700
   chargeDelayTarget: 60
   velocityClamp: 30
+  maxSpeed: 100
+  speed: 20
 --- !u!54 &142358433
 Rigidbody:
   m_ObjectHideFlags: 0
