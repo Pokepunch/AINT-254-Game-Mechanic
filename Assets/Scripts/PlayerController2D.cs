@@ -7,6 +7,11 @@ public class PlayerController2D : MonoBehaviour {
 
     CharacterController controller;
 
+    private int isLeft = 0;
+
+    public Material red;
+    public Material blue;
+
     public float speed = 200;
     private float speedBack;
 
@@ -14,11 +19,9 @@ public class PlayerController2D : MonoBehaviour {
     private float charge;
     public float chargeDelay = 1.5f;
 
-    private bool isOnGround;
-    private bool wasOnGround;
-
     public float jumpForce = 2;
     private float jumpForceCurrent;
+    public float jumpHeight;
     private bool isJumping = false;
 
     public float dashForce = 1800;
@@ -62,11 +65,11 @@ public class PlayerController2D : MonoBehaviour {
             {
                 if (x > 0)
                 {
-                    x = 1;
+                    x = isLeft = 1;
                 }
                 else if (x < 0)
                 {
-                    x = -1;
+                    x = isLeft = -1;
                 }
             }
             if (Input.GetButton("Vertical"))
@@ -77,7 +80,7 @@ public class PlayerController2D : MonoBehaviour {
                 }
                 else if (y < 0)
                 {
-                    y = -1;
+                    y = 0;
                 }
             }
             movement = new Vector2(x, y);
@@ -93,7 +96,7 @@ public class PlayerController2D : MonoBehaviour {
         }
         if (Input.GetButton("Jump") && isJumping)
         {
-            if (jumpForceCurrent < jumpForce + 24f)
+            if (jumpForceCurrent < jumpForce + jumpHeight)
             {
                 moveDirection.y = jumpForceCurrent;
                 jumpForceCurrent += 1;
@@ -107,6 +110,10 @@ public class PlayerController2D : MonoBehaviour {
         {
             if (dashTime > 0)
             {
+                if (movement == Vector2.zero)
+                {
+                    movement.x = isLeft;
+                }
                 moveDirection = new Vector3(movement.x * dashForce, movement.y * dashForce, 0);
                 dashTime -= Time.deltaTime;
             }
@@ -114,18 +121,11 @@ public class PlayerController2D : MonoBehaviour {
             {
                 isDashing = false;
                 canDash = false;
+                moveDirection.y = moveDirection.y / 2;
+                GetComponent<Renderer>().material = red;
                 dashTime = dashTimeBack;
                 GetInput();
-                /*
-                if (moveDirection.x < 0)
-                {
-                    speed = -moveDirection.x;
-                }
-                else if(moveDirection.x > 0)
-                {
-                    speed = moveDirection.x;
-                }
-                */
+                speed = dashForce;
             }
         }
         else if (canDash)
@@ -136,14 +136,18 @@ public class PlayerController2D : MonoBehaviour {
                 {
                     charge += Time.deltaTime;
                 }
+                else
+                {
+                    GetComponent<Renderer>().material = blue;
+                }
             }
             else if (Input.GetButtonUp("ChargeDash"))
             {
                 if (charge >= chargeDelay)
                 {
                     isDashing = true;
-                    charge = 0;
                 }
+                charge = 0;
             }
         }
     }
@@ -167,7 +171,7 @@ public class PlayerController2D : MonoBehaviour {
             isJumping = false;
             canDash = true;
             speed = speedBack;
-            moveDirection.y = -controller.stepOffset / Time.deltaTime;
+            moveDirection.y = -controller.stepOffset - Time.deltaTime;
             jumpForceCurrent = 0;
         }
         else
@@ -175,9 +179,9 @@ public class PlayerController2D : MonoBehaviour {
             if (!isDashing)
             {
                 moveDirection.y += Physics.gravity.y;
-                if (moveDirection.y < -35)
+                if (moveDirection.y < -40)
                 {
-                    moveDirection.y = -35;
+                    moveDirection.y = -40;
                 }
             }
         }
